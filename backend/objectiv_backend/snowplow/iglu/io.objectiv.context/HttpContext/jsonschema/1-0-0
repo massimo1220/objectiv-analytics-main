@@ -1,0 +1,44 @@
+{
+    "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+    "description": "A GlobalContext describing meta information about the agent that sent the event.",
+    "self": {
+        "vendor": "io.objectiv.context",
+        "name": "HttpContext",
+        "format": "jsonschema",
+        "version": "1-0-0"
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "string"
+            ],
+            "description": "A unique string identifier to be combined with the Context Type (`_type`) for Context instance uniqueness."
+        },
+        "referrer": {
+            "type": [
+                "string"
+            ],
+            "description": "Full URL to HTTP referrer of the current page."
+        },
+        "user_agent": {
+            "type": [
+                "string"
+            ],
+            "description": "User-agent of the agent that sent the event."
+        },
+        "remote_address": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "(public) IP address of the agent that sent the event."
+        }
+    },
+    "additionalProperties": true,
+    "required": [
+        "id",
+        "referrer",
+        "user_agent"
+    ]
+}

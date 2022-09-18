@@ -1,0 +1,30 @@
+{
+  "name": "@objectiv/utilities",
+  "version": "0.0.25",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Objectiv Core Utilities",
+  "files": [
+    "src/generateSchema.js",
+    "src/generateErrorMessages.ts"
+  ],
+  "scripts": {
+    "prettify": "prettier --write .",
+    "generate:schema": "(cd src && node generateSchema.js)",
+    "generate:errors": "tsup src/generateErrorMessages.ts --onSuccess 'node dist/generateErrorMessages.js'",
+    "generate:country-codes": "node src/generateCountryCodes.js",
+    "generate:language-codes": "node src/generateLanguageCodes.js",
+    "generate:locale-codes": "yarn generate:country-codes && yarn generate:language-codes",
+    "generate": "yarn generate:schema && yarn generate:errors && yarn generate:locale-codes",
+    "depcheck": "npx depcheck"
+  },
+  "devDependencies": {
+    "@objectiv/tracker-core": "^0.0.25",
+    "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.12",
+    "json5": "^2.2.1",
+    "prettier": "^2.7.1",
+    "tsup": "^6.2.1",
+    "typescript": "^4.7.4"
+  }
+}

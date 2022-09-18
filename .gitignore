@@ -1,0 +1,8 @@
+.vscode
+.idea
+
+# ds/notebooks
+.DS_Store
+secrets
+.ipynb_checkpoints
+__pycache__

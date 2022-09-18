@@ -1,0 +1,50 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "outputs": [],
+      "dependsOn": ["^test"]
+    },
+    "test:ci": {
+      "outputs": [],
+      "dependsOn": ["^test:ci"]
+    },
+    "test:coverage": {
+      "outputs": ["coverage/**"],
+      "dependsOn": ["^test:coverage"]
+    },
+    "prettify": {
+      "inputs": [
+        ".prettierignore",
+        ".prettierrc.json",
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "src/**/*.js",
+        "tests/**/*.tsx",
+        "tests/**/*.ts",
+        "tests/**/*.js"
+      ],
+      "dependsOn": ["^prettify"]
+    },
+    "depcheck": {
+      "outputs": [],
+      "dependsOn": ["^depcheck"]
+    },
+    "tsc": {
+      "outputs": [],
+      "dependsOn": ["^tsc"]
+    },
+    "generate": {
+      "outputs": ["generated/**"]
+    },
+    "pre-deploy": {
+      "dependsOn": ["prettify", "depcheck", "tsc", "build", "test"]
+    },
+    "deploy:verdaccio": {
+      "dependsOn": ["pre-deploy", "^deploy:verdaccio"]
+    }
+  }
+}

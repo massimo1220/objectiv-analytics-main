@@ -1,0 +1,79 @@
+{
+    "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+    "description": "a context that captures marketing channel info, so users can do attribution, campaign effectiveness and other models.",
+    "self": {
+        "vendor": "io.objectiv.context",
+        "name": "MarketingContext",
+        "format": "jsonschema",
+        "version": "1-0-0"
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "string"
+            ],
+            "description": "A unique string identifier to be combined with the Context Type (`_type`) for Context instance uniqueness."
+        },
+        "source": {
+            "type": [
+                "string"
+            ],
+            "description": "Identifies the advertiser, site, publication, etc."
+        },
+        "medium": {
+            "type": [
+                "string"
+            ],
+            "description": "Advertising or marketing medium: cpc, banner, email newsletter, etc."
+        },
+        "campaign": {
+            "type": [
+                "string"
+            ],
+            "description": "Individual campaign name, slogan, promo code, etc."
+        },
+        "term": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "[Optional] Search keywords."
+        },
+        "content": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "[Optional] Used to differentiate similar content, or links within the same ad."
+        },
+        "source_platform": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "[Optional] To differentiate similar content, or links within the same ad."
+        },
+        "creative_format": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "[Optional] Identifies the creative used (e.g., skyscraper, banner, etc)."
+        },
+        "marketing_tactic": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "[Optional] Identifies the marketing tactic used (e.g., onboarding, retention, acquisition etc)."
+        }
+    },
+    "additionalProperties": true,
+    "required": [
+        "id",
+        "source",
+        "medium",
+        "campaign"
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+    "description": "Objectiv Taxonomy schema",
+    "self": {
+        "vendor": "io.objectiv",
+        "name": "taxonomy",
+        "format": "jsonschema",
+        "version": "1-0-0"
+    },
+    "type": "object",
+    "properties": {
+        "_type": {
+            "type": "string",
+            "description": "Type of event",
+            "minLength": 2,
+            "maxLength": 32
+        },
+        "event_id": {
+            "type": "string",
+            "description": "Unique identifier for this event",
+            "minLength": 20,
+            "maxLength": 128
+        },
+        "location_stack": {
+            "type": "array",
+            "description": "Stack of location in UI"
+        },
+        "global_contexts": {
+            "type": "array",
+            "description": "List of global contexts"
+        },
+        "time": {
+            "type": "integer",
+            "description": "When did the event occur",
+            "minimum": 0
+        },
+        "_types": {
+            "type": "array",
+            "description": "List of hierarchical types"
+        },
+        "cookie_id": {
+            "type": "string",
+            "description": "Identify the session",
+            "minLength": 20,
+            "maxLength": 128
+        }
+    },
+    "additionalProperties": true,
+    "required": ["_type", "event_id", "location_stack", "global_contexts", "time", "_types", "cookie_id"]
+}

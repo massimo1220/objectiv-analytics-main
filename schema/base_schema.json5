@@ -1,0 +1,335 @@
+{
+  "name": "base_schema",
+  "version": {"base_schema": "0.0.5"},
+  "description": "This is the Objectiv base schema for the Open Analytics Taxonomy.",
+  "events": {
+    "AbstractEvent": {
+      "description": "This is the abstract parent of all Events.",
+      "parents": [],
+      "requiresContext": ["ApplicationContext"],
+      "properties":{
+        "location_stack": {
+          "description": "The location stack is an ordered list (stack), that contains a hierarchy of location contexts that \n\
+            deterministically describes where an event took place from global to specific. \n\
+            The whole stack (list) is needed to exactly pinpoint where in the UI the event originated.",
+          "type": "array",
+          "items": {
+            "type":"AbstractLocationContext"
+          }
+        },
+        "global_contexts": {
+          "description": "Global contexts add global / general information about the event. They carry information that is not \n\
+            related to where the Event originated (location), such as device, platform or business data.",
+          "type": "array",
+          "items": {
+            "type":"AbstractGlobalContext"
+          }
+        },
+        "_type": {
+          "description": "String containing the name of the event type. (eg. ClickEvent).",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique identifier for a specific instance of an event. Typically UUID's are a good way of \n\
+            implementing this. On the collector side, events should be unique, this means duplicate id's result \n\
+            in `not ok` events.",
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[a-f0-9]{4}-[a-f0-9]{12}$"
+        },
+        "time": {
+          "description": "Timestamp indicating when the event was generated.",
+          "type": "integer"
+        }
+      }
+    },
+    "InteractiveEvent": {
+      "description": "The parent of Events that are the direct result of a user interaction, e.g. a button click.",
+      "parents": ["AbstractEvent"],
+      "requiresContext": ["AbstractLocationContext"]
+    },
+    "NonInteractiveEvent": {
+      "description": "The parent of Events that are not directly triggered by a user action.",
+      "parents": ["AbstractEvent"],
+      "requiresContext": []
+    },
+    "ApplicationLoadedEvent": {
+      "description": "A NonInteractive event that is emitted after an application (eg. SPA) has finished loading.",
+      "parents": ["NonInteractiveEvent"],
+      "requiresContext": []
+    },
+    "FailureEvent": {
+      "description": "A NonInteractiveEvent that is sent when a user action results in a error, \n\
+        like an invalid email when sending a form.",
+      "parents": [
+        "NonInteractiveEvent"
+      ],
+      "requiresContext": [],
+      "properties": {
+        "message": {
+          "description": "Failure message.",
+          "type": "string"
+        }
+      },
+    },
+    "InputChangeEvent": {
+      "description": "Event triggered when user input is modified.",
+      "parents": ["InteractiveEvent"],
+      "requiresContext": ["InputContext"]
+    },
+    "PressEvent": {
+      "description": "An InteractiveEvent that is sent when a user presses on a pressable element \n\
+        (like a link, button, icon).",
+      "parents": ["InteractiveEvent"],
+      "requiresContext": ["PressableContext"]
+    },
+    "HiddenEvent": {
+      "description": "A NonInteractiveEvent that's emitted after a LocationContext has become invisible.",
+      "parents": ["NonInteractiveEvent"],
+      "requiresContext": ["AbstractLocationContext"]
+    },
+    "VisibleEvent": {
+      "description": "A NonInteractiveEvent that's emitted after a section LocationContext has become visible.",
+      "parents": ["NonInteractiveEvent"],
+      "requiresContext": ["AbstractLocationContext"]
+    },
+    "SuccessEvent": {
+      "description": "A NonInteractiveEvent that is sent when a user action is successfully completed, \n\
+        like sending an email form.",
+      "parents": ["NonInteractiveEvent"],
+      "requiresContext": [],
+      "properties": {
+        "message": {
+          "description": "Success message.",
+          "type": "string"
+        }
+      }
+    },
+    "MediaEvent": {
+      "description": "The parent of non-interactive events that are triggered by a media player. \n\
+       It requires a MediaPlayerContext to detail the origin of the event.",
+      "parents": ["NonInteractiveEvent"],
+      "requiresContext": ["MediaPlayerContext"]
+    },
+    "MediaLoadEvent": {
+      "description": "A MediaEvent that's emitted after a media item completes loading.",
+      "parents": ["MediaEvent"],
+      "requiresContext": []
+    },
+    "MediaPauseEvent": {
+      "description": "A MediaEvent that's emitted after a media item pauses playback.",
+      "parents": ["MediaEvent"],
+      "requiresContext": []
+    },
+    "MediaStartEvent": {
+      "description": "A MediaEvent that's emitted after a media item starts playback.",
+      "parents": ["MediaEvent"],
+      "requiresContext": []
+    },
+    "MediaStopEvent": {
+      "description": "A MediaEvent that's emitted after a media item stops playback.",
+      "parents": ["MediaEvent"],
+      "requiresContext": []
+    },
+  },
+  "contexts": {
+    "AbstractContext": {
+      "description": "AbstractContext defines the bare minimum properties for every Context. All Contexts inherit from it.",
+      "properties": {
+        "id": {
+          "description":"A unique string identifier to be combined with the Context Type (`_type`) \n\
+           for Context instance uniqueness.",
+          "type": "string"
+        },
+        "_type": {
+          "description": "A string literal used during serialization. Should always match the Context interface name.",
+          "type": "string"
+        }
+      }
+    },
+    "AbstractGlobalContext": {
+      "description": "This is the abstract parent of all Global Contexts. Global contexts add general information to an Event.",
+      "parents": ["AbstractContext"]
+    },
+    "ApplicationContext": {
+      "description": "A GlobalContext describing in which app the event happens, like a website or iOS app.",
+      "parents": ["AbstractGlobalContext"]
+    },
+    "CookieIdContext": {
+      "description": "Global context with information needed to reconstruct a user session.",
+      "parents": ["AbstractGlobalContext"],
+      "properties": {
+        "cookie_id": {
+          "description": "Unique identifier from the session cookie.",
+          "type": "string"
+        }
+      }
+    },
+    "HttpContext": {
+      "description": "A GlobalContext describing meta information about the agent that sent the event.",
+      "parents": ["AbstractGlobalContext"],
+      "properties": {
+        "referrer": {
+          "description": "Full URL to HTTP referrer of the current page.",
+          "type": "string"
+        },
+        "user_agent": {
+          "description": "User-agent of the agent that sent the event.",
+          "type": "string"
+        },
+        "remote_address": {
+          "description": "(public) IP address of the agent that sent the event.",
+          "type": "string",
+          "optional": true
+        }
+      }
+    },
+    "InputValueContext": {
+      "description": "A GlobalContext containing the value of a single input element. Multiple can be present.",
+      "parents": ["AbstractGlobalContext"],
+      "properties": {
+        "value": {
+          "description": "The value of the input element.",
+          "type": "string"
+        }
+      }
+    },
+    "LocaleContext": {
+      "description": "A GlobalContext describing the users' language (ISO 639-1) and country (ISO 3166-1 alpha-2).",
+      "parents": ["AbstractGlobalContext"],
+      "properties": {
+        "language_code": {
+          "description": "Case sensitive ISO 639-1 language code. E.g. en, nl, fr, de, it, etc.",
+          "type": "string",
+          "optional": true
+        },
+        "country_code": {
+          "description": "Case sensitive ISO 3166-1 alpha-2 country code. E.g. US, NL, FR, DE, IT, etc.",
+          "type": "string",
+          "optional": true
+        }
+      }
+    },
+    "PathContext": {
+      "description": "A GlobalContext describing the path where the user is when an event is sent.",
+      "parents": ["AbstractGlobalContext"]
+    },
+    "SessionContext": {
+      "description": "A GlobalContext describing meta information about the current session.",
+      "parents": [
+        "AbstractGlobalContext"
+      ],
+      "properties": {
+        "hit_number": {
+          "description": "Hit counter relative to the current session, this event originated in.",
+          "type": "integer"
+        }
+      }
+    },
+    "MarketingContext": {
+      "description": "a context that captures marketing channel info, so users can do attribution, campaign \n\
+        effectiveness and other models.",
+      "parents": ["AbstractGlobalContext"],
+      "properties": {
+        "source": {
+          "description": "Identifies the advertiser, site, publication, etc.",
+          "type": "string"
+        },
+        "medium": {
+          "description": "Advertising or marketing medium: cpc, banner, email newsletter, etc.",
+          "type": "string"
+        },
+        "campaign": {
+          "description": "Individual campaign name, slogan, promo code, etc.",
+          "type": "string"
+        },
+        "term": {
+          "description": "[Optional] Search keywords.",
+          "type": "string",
+          "optional": true
+        },
+        "content": {
+          "description": "[Optional] Used to differentiate similar content, or links within the same ad.",
+          "type": "string",
+          "optional": true
+        },
+        "source_platform": {
+          "description": "[Optional] To differentiate similar content, or links within the same ad.",
+          "type": "string",
+          "optional": true
+        },
+        "creative_format": {
+          "description": "[Optional] Identifies the creative used (e.g., skyscraper, banner, etc).",
+          "type": "string",
+          "optional": true
+        },
+        "marketing_tactic": {
+          "description": "[Optional] Identifies the marketing tactic used (e.g., onboarding, retention, acquisition etc).",
+          "type": "string",
+          "optional": true
+        }
+      }
+    },
+    "IdentityContext": {
+      "description": "A Global Context to track the identity of users across sessions, platforms, devices. Multiple can be present.\n\
+        The `id` field is used to specify the scope of identification e.g. backend, md5(email), supplier_cookie, etc.\n\
+        The `value` field should contain the unique identifier within that scope.",
+      "parents": ["AbstractGlobalContext"],
+      "properties": {
+        "value": {
+          "description": "The unique identifier for this user/group/entity within the scope defined by `id`.",
+          "type": "string"
+        }
+      }
+    },
+    "AbstractLocationContext": {
+      "description": "AbstractLocationContext are the abstract parents of all Location Contexts.\n\
+        Location Contexts are meant to describe where an event originated from in the visual UI.",
+      "parents": ["AbstractContext"],
+      "requiresContext": ["RootLocationContext", "PathContext"]
+    },
+    "InputContext": {
+      "description": "A Location Context that describes an element that accepts user input, i.e. a form field.",
+      "parents": ["AbstractLocationContext"]
+    },
+    "PressableContext": {
+      "description": "An Location Context that describes an interactive element (like a link, button, icon), \n\
+        that the user can press and will trigger an Interactive Event.",
+      "parents": ["AbstractLocationContext"]
+    },
+    "LinkContext": {
+      "description": "A PressableContext that contains an href.",
+      "parents": ["PressableContext"],
+      "properties": {
+        "href": {
+          "description": "URL (href) the link points to.",
+          "type": "string"
+        }
+      }
+    },
+    "RootLocationContext": {
+      "description": "A Location Context that uniquely represents the top-level UI location of the user.",
+      "parents": ["AbstractLocationContext"]
+    },
+    "ExpandableContext": {
+      "description": "A Location Context that describes a section of the UI that can expand & collapse.",
+      "parents": ["AbstractLocationContext"]
+    },
+    "MediaPlayerContext": {
+      "description": "A Location Context that describes a section of the UI containing a media player.",
+      "parents": ["AbstractLocationContext"]
+    },
+    "NavigationContext": {
+      "description": "A Location Context that describes a section of the UI containing navigational elements, for example a menu.",
+      "parents": ["AbstractLocationContext"]
+    },
+    "OverlayContext": {
+      "description": "A Location Context that describes a section of the UI that represents an overlay, i.e. a Modal.",
+      "parents": ["AbstractLocationContext"]
+    },
+    "ContentContext": {
+      "description": "A Location Context that describes a logical section of the UI that contains other Location Contexts. \n\
+        Enabling Data Science to analyze this section specifically.",
+      "parents": ["AbstractLocationContext"]
+    }
+  }
+}

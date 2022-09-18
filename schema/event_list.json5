@@ -1,0 +1,23 @@
+{
+  "name": "event_list",
+  "version": {"base_schema": "0.0.2"},
+  "description": "This is the Objectiv event list schema",
+  "properties": {
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "AbstractEvent"
+      },
+      "description": "List/array of events. See the base_schema for the definition of an (abstract)event"
+    },
+    "client_session_id": {
+      "type": "string",
+      "description": "A page/tab/screen session unique identifier generated on the client"
+    },
+    "transport_time": {
+      "type": "integer",
+      "description": "Timestamp when the list of events was sent by the tracker"
+    }
+  },
+  "required": ["events", "transport_time"]
+}

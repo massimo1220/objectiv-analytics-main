@@ -1,0 +1,132 @@
+# Start the Objectiv Pipeline.
+#
+# can simply be run using:
+# `docker-compose up -d`
+# No need to set any environment variables.
+#
+# By default this uses ready built images from dockerhub, or local images if available. To use a different
+# image repository, set OBJECTIV_CONTAINER_URL to that repo.
+# To use a specific image tag instead of latest set OBJECTIV_CONTAINER_TAG
+
+# WARNING: The postgres configuration here doesn't actually check passwords! This is for local testing only
+
+x-db_env_variables: &db_env_variables
+  # warning: never put production credentials in here!
+  POSTGRES_USER: 'objectiv'
+  POSTGRES_PASSWORD: 'no_password_set'
+  POSTGRES_DB: 'objectiv'
+  POSTGRES_HOSTNAME: 'objectiv_postgres'
+  POSTGRES_PORT: 5432
+
+version: "3.4"
+services:
+  objectiv_website:
+    container_name: objectiv_website
+    image: ${OBJECTIV_CONTAINER_URL-objectiv}/website:${OBJECTIV_CONTAINER_TAG-latest}
+    depends_on:
+      - objectiv_collector
+    ports:
+      - "127.0.0.1:8080:80"
+    networks:
+      - obj
+    healthcheck:
+      test: [ "CMD", "printf",  "\"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/80" ]
+      interval: 30s
+      timeout: 2s
+      retries: 3
+
+  objectiv_collector:
+    container_name: objectiv_collector
+    depends_on:
+      - objectiv_postgres
+    image: ${OBJECTIV_CONTAINER_URL-objectiv}/backend:${OBJECTIV_CONTAINER_TAG-latest}
+    working_dir: /services
+    entrypoint: bash -c "objectiv-db-init; ./entry_point.sh"
+    ports:
+      - "127.0.0.1:8081:8081"
+    networks:
+      - obj
+    restart: unless-stopped
+    volumes:
+      - ${SCHEMA_EXTENSION_DIRECTORY-./backend/tests/test_data/schemas1}/:/schema-extensions/
+    environment:
+      <<: *db_env_variables
+      SCHEMA_EXTENSION_DIRECTORY: /schema-extensions/
+      COOKIE_SECURE: "True"
+      COOKIE_SAMESITE: None
+      PORT: 8081
+    healthcheck:
+      test: ["CMD", "printf",  "\"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/8081"]
+      interval: 30s
+      timeout: 2s
+      retries: 3
+
+  objectiv_postgres:
+    container_name: objectiv_postgres
+    image: postgres:latest
+    networks:
+      - obj
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      <<: *db_env_variables
+      # WARNING: Disabling authentication here
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U objectiv" ]
+      interval: 10s
+      timeout: 2s
+      retries: 5
+
+  objectiv_notebook:
+    container_name: objectiv_notebook
+    image: ${OBJECTIV_CONTAINER_URL-objectiv}/notebook:${OBJECTIV_CONTAINER_TAG-latest}
+    ports:
+      - "127.0.0.1:8888:8888"
+      - "127.0.0.1:8053:8053"
+    networks:
+      - obj
+    restart: unless-stopped
+    depends_on:
+      # we make it depend on the other instances
+      # so we have the best chance of the db being up in time
+      - objectiv_postgres
+      - objectiv_collector
+    environment:
+      <<: *db_env_variables
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888" ]
+      interval: 30s
+      timeout: 2s
+      retries: 3
+
+  objectiv_metabase:
+    container_name: objectiv_metabase
+    image: ${OBJECTIV_CONTAINER_URL-objectiv}/metabase:${OBJECTIV_CONTAINER_TAG-latest}
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - obj
+    restart: unless-stopped
+    depends_on:
+      - objectiv_postgres
+      - objectiv_notebook
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: metabase
+      MB_DB_PASS: metabase
+      MB_DB_HOST: objectiv_postgres
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 2s
+      retries: 3
+
+# use bridged networking, so we can access services provided from the host
+networks:
+  obj:
+    driver: bridge
+

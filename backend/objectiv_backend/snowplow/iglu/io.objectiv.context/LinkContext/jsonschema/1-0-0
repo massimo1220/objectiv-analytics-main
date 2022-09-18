@@ -1,0 +1,30 @@
+{
+    "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+    "description": "A PressableContext that contains an href.",
+    "self": {
+        "vendor": "io.objectiv.context",
+        "name": "LinkContext",
+        "format": "jsonschema",
+        "version": "1-0-0"
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "string"
+            ],
+            "description": "A unique string identifier to be combined with the Context Type (`_type`) for Context instance uniqueness."
+        },
+        "href": {
+            "type": [
+                "string"
+            ],
+            "description": "URL (href) the link points to."
+        }
+    },
+    "additionalProperties": true,
+    "required": [
+        "id",
+        "href"
+    ]
+}

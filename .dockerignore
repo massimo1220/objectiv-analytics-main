@@ -1,0 +1,11 @@
+docker-compose.yaml  
+metabase-experiment
+tracker/
+
+backend/jsons/
+backend/venv/
+node_modules/
+.idea
+.git
+**/venv/
+

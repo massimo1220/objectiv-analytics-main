@@ -1,0 +1,41 @@
+# ###################################
+# ### Settings for running tests  ###
+# ###################################
+
+# To use:
+# 1) Copy and rename this file to .test_env
+# 2) Fill out relevant values.
+
+# Note that values that are left out, often have default values in `conftest.py` too. Those defaults make it
+# easier to run tests without any configuration.
+
+
+
+# #####################
+# Postgres Settings
+# #####################
+OBJ_DB_PG_TEST_URL = "postgresql://objectiv:@localhost:5432/objectiv"
+
+
+# #####################
+# Athena settings
+# #####################
+
+# Full url to the Athena test database.
+OBJ_DB_ATHENA_TEST_URL=
+
+# Partial settings; will be ignored if OBJ_DB_ATHENA_TEST_URL is set
+OBJ_DB_ATHENA_AWS_ACCESS_KEY_ID=
+OBJ_DB_ATHENA_AWS_SECRET_ACCESS_KEY=
+
+OBJ_DB_ATHENA_REGION_NAME="eu-west-1"
+OBJ_DB_ATHENA_SCHEMA_NAME="automated_tests.bach_test"
+OBJ_DB_ATHENA_S3_STAGING_DIR="s3://obj-automated-tests/bach_test/staging/"
+OBJ_DB_ATHENA_WORK_GROUP="automated_tests_work_group"
+
+
+# #####################
+# BigQuery settings
+# #####################
+OBJ_DB_BQ_TEST_URL= "bigquery://objectiv-snowplow-test-2/bach_test"
+OBJ_DB_BQ_CREDENTIALS_PATH=

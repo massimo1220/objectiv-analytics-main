@@ -1,0 +1,30 @@
+{
+    "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+    "description": "A GlobalContext describing meta information about the current session.",
+    "self": {
+        "vendor": "io.objectiv.context",
+        "name": "SessionContext",
+        "format": "jsonschema",
+        "version": "1-0-0"
+    },
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "string"
+            ],
+            "description": "A unique string identifier to be combined with the Context Type (`_type`) for Context instance uniqueness."
+        },
+        "hit_number": {
+            "type": [
+                "integer"
+            ],
+            "description": "Hit counter relative to the current session, this event originated in."
+        }
+    },
+    "additionalProperties": true,
+    "required": [
+        "id",
+        "hit_number"
+    ]
+}

@@ -1,0 +1,7 @@
+build/
+dist/
+objectiv_backend.egg-info/
+venv
+*.pyc
+__pycache__
+

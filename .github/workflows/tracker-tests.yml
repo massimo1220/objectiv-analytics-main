@@ -1,0 +1,114 @@
+name: "Tracker tests"
+
+on:
+  push:
+    paths:
+      - 'schema/**'
+      - 'tracker/**'
+      # Also run if we update this file, or any other workflow
+      - '.github/**'
+
+jobs:
+  install-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache node_modules
+        id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        working-directory: tracker
+        run: yarn install
+
+  run-depcheck:
+    runs-on: ubuntu-latest
+    needs: [install-dependencies]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use cached node_modules
+        id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Check dependencies
+        working-directory: tracker
+        run: yarn depcheck
+
+  run-ts-check:
+    runs-on: ubuntu-latest
+    needs: [install-dependencies]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use cached node_modules
+        id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Run TypeScript check
+        working-directory: tracker
+        run: yarn tsc
+
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    needs: [install-dependencies]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use cached node_modules
+        id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Run unit tests
+        working-directory: tracker
+        run: yarn test:ci
+
+  run-ts-schema-check:
+    runs-on: ubuntu-latest
+    needs: [install-dependencies]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use cached node_modules
+        id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Test if TS schema is up to date
+        working-directory: tracker
+        run: |
+          yarn generate
+          test $(git status -s -uno | wc -l) -eq 0
+
+  run-test-build:
+    runs-on: ubuntu-latest
+    needs: [install-dependencies]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use cached node_modules
+        id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Build all SDKs
+        working-directory: tracker
+        run: yarn build

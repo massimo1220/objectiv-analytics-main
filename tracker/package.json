@@ -1,0 +1,40 @@
+{
+  "name": "root",
+  "description": "Object Tracker monorepo root package",
+  "private": true,
+  "license": "Apache-2.0",
+  "workspaces": [
+    "core/*",
+    "plugins/*",
+    "queues/*",
+    "trackers/*",
+    "transports/*"
+  ],
+  "engines": {
+    "node": ">= 12",
+    "npm": ">= 8.5"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "yarn exec make clean && yarn test --clearCache && yarn cache clean",
+    "depcheck": "turbo run depcheck",
+    "deploy": "yarn registry:npm && turbo run pre-deploy && changeset publish",
+    "deploy:verdaccio": "yarn registry:verdaccio && turbo run deploy:verdaccio --force && yarn registry:npm",
+    "generate": "turbo run generate && turbo run prettify && turbo run tsc",
+    "list": "yarn workspaces list",
+    "pre-deploy": "yarn && turbo run pre-deploy",
+    "prettify": "turbo run prettify",
+    "registry:npm": "shx rm -f .npmrc",
+    "registry:verdaccio": "shx cp ./verdaccio/.npmrc .npmrc ",
+    "test": "turbo run test",
+    "test:ci": "turbo run test:ci",
+    "test:coverage": "turbo run test:coverage",
+    "tsc": "turbo run tsc"
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.24.2",
+    "shx": "^0.3.4",
+    "turbo": "^1.4.2"
+  },
+  "packageManager": "yarn@3.0.2"
+}

@@ -1,0 +1,116 @@
+name: "Bach Core tests: pytest mypy pycodestyle"
+
+on:
+  push:
+    paths:
+      - 'bach/**'
+      # Also run if we update this file, or any other workflow
+      - '.github/**'
+
+jobs:
+  bach-typecheck-and-run-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+        # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context on why we use endsWith
+        isMain:
+          - ${{ endsWith(github.ref,'/main') }}
+        exclude:
+          - isMain: false
+            python-version: '3.8'
+          - isMain: false
+            python-version: '3.9'
+          - isMain: false
+            python-version: '3.10'
+          
+    services:
+      # based on https://docs.github.com/en/actions/guides/creating-postgresql-service-containers
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: 'objectiv'
+          POSTGRES_PASSWORD: 'no_password_set'
+          POSTGRES_DB: 'objectiv'
+          POSTGRES_HOSTNAME: 'postgres'
+          POSTGRES_PORT: 5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      # tell tests to use the above defined postgres service
+      OBJ_DB_PG_TEST_URL: 'postgresql://objectiv:no_password_set@localhost:5432/objectiv'
+      GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      # Just the path to a temp file, the actual secret is fully contained in the env var above.
+      OBJ_DB_BQ_CREDENTIALS_PATH: './sa.json'
+      OBJ_DB_ATHENA_AWS_ACCESS_KEY_ID: ${{ secrets.OBJ_DB_ATHENA_AWS_ACCESS_KEY_ID }}
+      OBJ_DB_ATHENA_AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJ_DB_ATHENA_AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Cache pip
+        # Configure cache for the files that pip downloads. At the end of the steps the path gets cached
+        # (if the cache keys doesn't exist yet). If the cache key exists it gets restored in this step.
+        uses: actions/cache@v2
+        with:
+          # This path is specific to Ubuntu
+          path: ~/.cache/pip
+          key: pip-${{ matrix.python-version }}-${{ hashFiles('bach/setup.cfg') }}
+      - name: Install base/PG dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e bach[dev]
+      - name: Typecheck with mypy
+        run: |
+          cd bach
+          mypy bach sql_models
+      - name: Stylecheck with pycodestyle
+        run: |
+          cd bach
+          pycodestyle bach sql_models
+      - name: Unit tests Postgres
+        run: |
+          cd bach
+          pytest --postgres tests/unit
+      - name: Functional tests Postgres
+        run: |
+          cd bach
+          pytest -n 4 --dist loadgroup --postgres tests/functional
+      - name: Setup GCP Credentials
+        run: |
+          cd bach
+          echo $GCP_SERVICE_ACCOUNT > $OBJ_DB_BQ_CREDENTIALS_PATH
+      - name: Install BigQuery dependencies
+        run: |
+          pip install -e bach[bigquery]
+      - name: Unit tests BigQuery
+        run: |
+          cd bach
+          pytest --big-query tests/unit
+      - name: Functional tests BigQuery
+        run: |
+          cd bach
+          pytest -n 4 --dist loadgroup --big-query tests/functional
+      # In an ideal world we would start with a clean virtual-env and only install `bach[athena]` and
+      # `bach[dev]`, but the time it takes to setup these environments is also a consideration, so we don't
+      # start with a clean environment here and just build on top of the environment we used for BigQuery.
+      - name: Install Athena dependencies
+        run: |
+          pip install -e bach[athena]
+      - name: Unit tests Athena
+        run: |
+          cd bach
+          pytest --athena tests/unit
+      - name: Functional tests Athena
+        run: |
+          cd bach
+          pytest -n 4 --dist loadgroup --athena tests/functional

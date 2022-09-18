@@ -1,0 +1,25 @@
+{
+  "name": "extension2",
+  "version": {"extension2": "0.0.3"},
+  "events": {
+    "New2Event": {
+        "parents": ["NonInteractiveEvent"],
+        "requiresContext": ["X2Context"],
+        "description": "New test event"
+    }
+  },
+  "contexts": {
+    "X2Context": {
+      "parents": [
+        "AbstractGlobalContext"
+      ],
+      "description": "test XContext",
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "test field"
+        }
+      }
+    }
+  }
+}

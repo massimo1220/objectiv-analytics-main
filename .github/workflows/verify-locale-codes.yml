@@ -1,0 +1,29 @@
+name: "Verify Locale Codes"
+
+on:
+  push:
+    paths:
+      - 'schema/*.json5'
+      - 'tracker/plugins/locale-context/**'
+      - '.github/workflows/verify-locale-codes.yml'
+
+  schedule:
+    - cron:  '30 10,22 * * *'
+
+jobs:
+  verify-locale-codes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        working-directory: tracker
+        run: yarn install
+
+      - name: Generate locale codes
+        working-directory: tracker/core/utilities
+        run: yarn generate:locale-codes
+
+      - name: Run locale codes tests
+        working-directory: tracker/plugins/locale-context
+        run: yarn test tests/generated.test.ts

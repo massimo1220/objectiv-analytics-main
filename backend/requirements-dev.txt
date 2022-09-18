@@ -1,0 +1,6 @@
+autopep8
+pytest==6.2.4
+pytest-mock==3.8.2
+mypy==0.812
+boto3-stubs
+

@@ -1,0 +1,69 @@
+# Start the Objectiv Pipeline.
+#
+# By default uses images from dockerhub
+# To use locally built images set the OBJECTIV_CONTAINER_URL variable to just "objectiv"
+# To use a specific image version instead of latest set OBJECTIV_CONTAINER_TAG
+
+# WARNING: The postgres configuration here doesn't actually check passwords! This is for local testing only
+
+x-db_env_variables: &db_env_variables
+  # warning: never put production credentials in here!
+  POSTGRES_USER: 'objectiv'
+  POSTGRES_PASSWORD: 'no_password_set'
+  POSTGRES_DB: 'objectiv'
+  POSTGRES_HOSTNAME: 'objectiv_postgres'
+  POSTGRES_PORT: 5432
+
+version: "3.4"
+services:
+  objectiv_collector:
+    container_name: objectiv_collector
+    depends_on:
+      - objectiv_postgres
+    image: ${OBJECTIV_CONTAINER_URL-objectiv/backend}:${OBJECTIV_CONTAINER_TAG-latest}
+    working_dir: /services
+    entrypoint: bash -c "objectiv-db-init; ./entry_point.sh"
+    ports:
+      - 127.0.0.1:8081:8081
+    networks:
+      - obj
+    volumes:
+      - ${SCHEMA_EXTENSION_DIRECTORY-./backend/tests/test_data/schemas1}/:/schema-extensions/
+    environment:
+      <<: *db_env_variables
+      SCHEMA_EXTENSION_DIRECTORY: /schema-extensions/
+      PORT: 8081
+    healthcheck:
+      test: ["CMD", "printf",  "\"GET / HTTP/1.1\n\n\" > /dev/tcp/127.0.0.1/8081"]
+      interval: 30s
+      timeout: 2s
+      retries: 3
+
+  objectiv_postgres:
+    container_name: objectiv_postgres
+    image: postgres:latest
+    ports:
+      - 127.0.0.1:5432:5432
+    networks:
+      - obj
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+    environment:
+      <<: *db_env_variables
+      # WARNING: Disabling authentication here
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U objectiv" ]
+      interval: 10s
+      timeout: 2s
+      retries: 5
+
+# persist PG data in a docker volume
+volumes:
+  pgdata:
+
+# use bridged networking, so we can access services provided from the host
+networks:
+  obj:
+    driver: bridge
+

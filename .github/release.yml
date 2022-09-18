@@ -1,0 +1,25 @@
+changelog:
+  exclude:
+    labels:
+      - "Release: Ignore for Changelog"
+  categories:
+    - title: Changes 🎉
+      labels:
+        - "Type: Epic"
+        - "Type: Story"
+        - "Type: Enhancement"
+    - title: Fixes
+      labels:
+        - "Type: Bug"
+    - title: Demo notebooks
+      labels:
+        - "Area: Demo"
+    - title: Under the hood
+      labels:
+        - "Type: Under the Hood"
+    - title: Other Changes
+      labels:
+        - "*"
+    - title: Docs
+      labels:
+        - "Area: Docs"

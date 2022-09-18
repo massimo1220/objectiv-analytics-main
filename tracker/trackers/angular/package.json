@@ -1,0 +1,65 @@
+{
+  "name": "@objectiv/tracker-angular",
+  "version": "0.0.25",
+  "description": "Objectiv Angular framework analytics tracker for the open analytics taxonomy",
+  "license": "Apache-2.0",
+  "homepage": "https://objectiv.io",
+  "keywords": [
+    "objectiv",
+    "tracking",
+    "web",
+    "angular",
+    "analytics",
+    "events",
+    "taxonomy"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/objectiv/objectiv-analytics.git",
+    "directory": "tracker/trackers/angular"
+  },
+  "bugs": "https://github.com/objectiv/objectiv-analytics/issues",
+  "contributors": [
+    {
+      "name": "Surai Di Rosa",
+      "email": "surai.dirosa@gmail.com",
+      "url": "https://github.com/sdirosa"
+    }
+  ],
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/bundles/objectiv-tracker-angular.umd.js",
+  "module": "./dist/fesm5/objectiv-tracker-angular.js",
+  "es2015": "./dist/fesm2015/objectiv-tracker-angular.js",
+  "esm5": "./dist/esm5/objectiv-tracker-angular.js",
+  "esm2015": "./dist/esm2015/objectiv-tracker-angular.js",
+  "fesm5": "./dist/fesm5/objectiv-tracker-angular.js",
+  "fesm2015": "./dist/fesm2015/objectiv-tracker-angular.js",
+  "typings": "./dist/objectiv-tracker-angular.d.ts",
+  "metadata": "./dist/objectiv-tracker-angular.metadata.json",
+  "scripts": {
+    "build": "node build.js",
+    "deploy:verdaccio": "npm publish",
+    "prettify": "prettier --write .",
+    "tsc": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@angular/common": ">=9.0.0",
+    "@angular/core": ">=9.0.0",
+    "@objectiv/tracker-browser": "^0.0.25"
+  },
+  "devDependencies": {
+    "@angular/compiler": "~9.1.13",
+    "@angular/compiler-cli": "~9.1.13",
+    "@angular/core": "~9.1.13",
+    "@objectiv/tracker-browser": "^0.0.25",
+    "ng-packagr": "^9.1.5",
+    "prettier": "^2.7.1",
+    "rxjs": "~6.5.5",
+    "tslib": "^2.4.0",
+    "typescript": "~3.8.3",
+    "zone.js": "~0.11.7"
+  }
+}

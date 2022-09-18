@@ -1,0 +1,1 @@
+ignores: ["jest-environment-jsdom", "@types/jest"]

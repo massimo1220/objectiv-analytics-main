@@ -1,0 +1,5 @@
+# This directory is used for storing credentials and connection settings for tests.
+# Ignore everything in this directory, except for this file and the test env sample file
+*
+!.gitignore
+!.test_env.sample
